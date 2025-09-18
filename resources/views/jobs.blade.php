@@ -1,20 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Site</title>
-</head>
-<body>
- 
-
-  <x-layout>
+<x-layout>
     <x-slot:heading>
-        About Page
+        IT Jobs
     </x-slot:heading>
 
-    <p class="mt-4 text-gray-600">This is the About Page content.</p>
+    <ul class="list-disc pl-5">
+        @foreach ($jobs as $job)
+            <li class="mb-2">
+                <a href="/jobs/{{ $job['id'] }}" class="text-blue-500 hover:underline">
+                    <strong>{{ $job['title'] }}:</strong> Pays {{ $job['salary'] }} per year
+                </a>
+            </li>
+        @endforeach
+    </ul>
 </x-layout>
-
-</body>
-</html>

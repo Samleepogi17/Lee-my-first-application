@@ -1,20 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Site</title>
-</head>
-<body>
-  
-
-  <x-layout>
+<x-layout>
     <x-slot:heading>
-        Contact Page
+        Job Details
     </x-slot:heading>
 
-    <p class="mt-4 text-gray-600">Here’s how you can contact us.</p>
+    <h2 class="font-bold text-lg">{{ $job['title'] }}</h2>
+    <p>This job pays {{ $job['salary'] }} per year.</p>
+    <a href="/jobs" class="text-blue-600 hover:underline">Back to all jobs</a>
 </x-layout>
-
-</body>
-</html>
