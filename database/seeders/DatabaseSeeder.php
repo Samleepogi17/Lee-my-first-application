@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\Employer;
 use App\Models\Job;
+use App\Models\Tag;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,10 +14,19 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create 5 employers, each with 3 jobs
+        // 1️⃣ Create 10 random tags
+        $tags = Tag::factory(10)->create();
+
+        // 2️⃣ Create 5 employers, each with 3 jobs
         Employer::factory()
             ->count(5)
             ->has(Job::factory()->count(3))
-            ->create();
+            ->create()
+            ->each(function($employer) use ($tags) {
+                // Attach 2 random tags to each job of this employer
+                $employer->jobs->each(function($job) use ($tags) {
+                    $job->tags()->attach($tags->random(2));
+                });
+            });
     }
 }

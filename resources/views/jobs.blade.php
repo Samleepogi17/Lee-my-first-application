@@ -3,19 +3,27 @@
         IT Jobs
     </x-slot:heading>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <ul class="space-y-4">
         @foreach ($jobs as $job)
-            <div class="bg-white shadow-md rounded-lg p-6 border border-gray-200 hover:shadow-xl hover:border-blue-400 transition duration-200">
-                <h2 class="text-xl font-bold text-gray-800 mb-2">
-                    {{ $job->title }}
-                </h2>
-                <p class="text-gray-600 mb-1">💼 Salary: {{ $job->salary }}</p>
-                <p class="text-gray-500 text-sm mb-4">🏢 Employer: {{ $job->employer->name }}</p>
-                <a href="/jobs/{{ $job->id }}" 
-                   class="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                    View Details
+            <li class="bg-white rounded-lg shadow hover:shadow-lg transition">
+                <!-- Job Info Link -->
+                <a href="/jobs/{{ $job->id }}" class="block px-4 py-6 border-b border-gray-200">
+                    <div class="font-bold text-blue-500 text-sm">{{ $job->employer->name }}</div>
+                    <div>
+                        <strong class="text-laracasts">{{ $job->title }}:</strong>
+                        Pays {{ $job->salary }} per year.
+                    </div>
                 </a>
-            </div>
+
+                <!-- Tags -->
+                <div class="px-4 py-4">
+                    @foreach($job->tags as $tag)
+                        <span class="bg-gray-200 text-gray-700 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">
+                            {{ $tag->name }}
+                        </span>
+                    @endforeach
+                </div>
+            </li>
         @endforeach
-    </div>
+    </ul>
 </x-layout>

@@ -9,12 +9,23 @@ class Job extends Model
 {
     use HasFactory;
 
-    // Use the job_listings table instead of "jobs"
+    // Use the job_listings table instead of default "jobs"
     protected $table = 'job_listings';
 
     // Each job belongs to one employer
     public function employer()
     {
-        return $this->belongsTo(Employer::class);
+        return $this->belongsTo(\App\Models\Employer::class);
+    }
+
+    // Many-to-many relationship with tags
+    public function tags()
+    {
+        return $this->belongsToMany(
+            \App\Models\Tag::class,
+            'job_listing_tag',    // pivot table name
+            'job_listing_id',     // foreign key for Job in pivot
+            'tag_id'              // foreign key for Tag in pivot
+        );
     }
 }

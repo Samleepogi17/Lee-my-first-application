@@ -22,9 +22,10 @@
         </div>
     </section>
 
-    <!-- Quick Tool -->
-    <section class="max-w-3xl mx-auto">
-        <div class="bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
+    <!-- Quick Tools -->
+    <section class="max-w-6xl mx-auto flex justify-center">
+        <!-- Tool 1 -->
+        <div class="bg-white p-6 rounded-xl shadow hover:shadow-lg transition w-full max-w-md">
             <h3 class="text-xl font-bold text-gray-900 mb-2">💼 Browse Jobs</h3>
             <p class="text-gray-600 mb-4">
                 Explore available IT job listings and find the right match.
