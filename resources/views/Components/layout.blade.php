@@ -13,10 +13,13 @@
         <div class="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
             <div class="relative flex h-16 items-center justify-between">
 
-                <!-- Logo -->
-                <div class="flex flex-shrink-0 items-center text-white font-bold">
-                    My Site
+                            <!-- Logo -->
+                <div class="flex flex-shrink-0 items-center font-bold">
+                    <a href="/" class="text-white hover:text-gray-300">
+                        My Site
+                    </a>
                 </div>
+
 
                 <!-- Desktop menu -->
                 <div class="hidden md:block">

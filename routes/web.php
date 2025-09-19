@@ -8,10 +8,21 @@ Route::get('/', function () {
     return view('home');
 });
 
-// All Jobs - using the Job model
+// All Jobs - using the Job model + search filter
 Route::get('/jobs', function () {
+    $search = request('search'); // Get search query from ?search=...
+
+    $jobs = Job::all();
+
+    if ($search) {
+        $jobs = array_filter($jobs, function ($job) use ($search) {
+            return stripos($job['title'], $search) !== false;
+        });
+    }
+
     return view('jobs', [
-        'jobs' => Job::all()
+        'jobs' => $jobs,
+        'search' => $search
     ]);
 });
 
