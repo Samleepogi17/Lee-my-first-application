@@ -12,6 +12,13 @@ class Job extends Model
     // Use the job_listings table instead of default "jobs"
     protected $table = 'job_listings';
 
+    // Mass assignable fields
+    protected $fillable = [
+        'title',
+        'salary',
+        'employer_id',
+    ];
+
     // Cast salary to float automatically
     protected $casts = [
         'salary' => 'float',

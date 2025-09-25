@@ -10,31 +10,92 @@ class JobController extends Controller
 {
     /**
      * Display a paginated list of all jobs with their employers and tags.
-     * Supports optional search by job title.
+     * Supports searching by job title or employer name via ?search= keyword.
      */
     public function index(Request $request)
     {
-        $query = Job::with(['employer', 'tags']);
+        $search = $request->query('search');
 
-        // Optional search filter
-        if ($request->has('search') && !empty($request->search)) {
-            $search = $request->search;
-            $query->where('title', 'like', "%{$search}%");
-        }
+        $jobs = Job::with(['employer', 'tags'])
+            ->when($search, function ($query, $search) {
+                $query->where('title', 'like', "%{$search}%")
+                      ->orWhereHas('employer', function ($q) use ($search) {
+                          $q->where('name', 'like', "%{$search}%");
+                      });
+            })
+            ->paginate(10)
+            ->withQueryString(); // keeps the search term in pagination links
 
-        $jobs = $query->paginate(10)->withQueryString(); // keeps search query on pagination
-
-        return view('jobs.index', compact('jobs'));
+        return view('jobs.index', compact('jobs', 'search'));
     }
 
     /**
-     * Display a single job's details with employer and tags.
+     * Show the form to create a new job.
      */
-    public function show($id)
+    public function create()
     {
-        $job = Job::with(['employer', 'tags'])->findOrFail($id);
+        $job = new Job(); // empty job instance for the form
+        return view('jobs.form', compact('job'));
+    }
 
+    /**
+     * Store a new job in the database.
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'title' => ['required', 'min:3'],
+            'salary' => ['required', 'numeric'],
+        ]);
+
+        Job::create([
+            'title' => $validated['title'],
+            'salary' => $validated['salary'],
+            'employer_id' => 1, // hardcoded for now, replace with real employer as needed
+        ]);
+
+        return redirect()->route('jobs.index')->with('success', 'Job created successfully!');
+    }
+
+    /**
+     * Display a single job's details.
+     */
+    public function show(Job $job)
+    {
+        $job->load(['employer', 'tags']);
         return view('jobs.show', compact('job'));
+    }
+
+    /**
+     * Show the form to edit an existing job.
+     */
+    public function edit(Job $job)
+    {
+        return view('jobs.form', compact('job'));
+    }
+
+    /**
+     * Update a job in the database.
+     */
+    public function update(Request $request, Job $job)
+    {
+        $validated = $request->validate([
+            'title' => ['required', 'min:3'],
+            'salary' => ['required', 'numeric'],
+        ]);
+
+        $job->update($validated); // safe update
+
+        return redirect()->route('jobs.show', $job)->with('success', 'Job updated successfully!');
+    }
+
+    /**
+     * Delete a job from the database.
+     */
+    public function destroy(Job $job)
+    {
+        $job->delete();
+        return redirect()->route('jobs.index')->with('success', 'Job deleted successfully!');
     }
 
     /**
@@ -42,14 +103,12 @@ class JobController extends Controller
      */
     public function attachTagsToJob($id = null)
     {
-        // Use given ID or first job
         $job = $id ? Job::find($id) : Job::first();
 
         if (!$job) {
             return response("Job not found!", 404);
         }
 
-        // Attach 2 random tags dynamically
         $tagIds = Tag::inRandomOrder()->take(2)->pluck('id');
         $job->tags()->sync($tagIds);
 
