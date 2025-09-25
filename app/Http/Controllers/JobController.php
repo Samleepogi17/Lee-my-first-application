@@ -6,112 +6,87 @@ use Illuminate\Http\Request;
 use App\Models\Job;
 use App\Models\Tag;
 
+
 class JobController extends Controller
 {
-    /**
-     * Display a paginated list of all jobs with their employers and tags.
-     * Supports searching by job title or employer name via ?search= keyword.
-     */
-    public function index(Request $request)
+    // Display paginated list of jobs
+    public function index()
     {
-        $search = $request->query('search');
-
-        $jobs = Job::with(['employer', 'tags'])
-            ->when($search, function ($query, $search) {
-                $query->where('title', 'like', "%{$search}%")
-                      ->orWhereHas('employer', function ($q) use ($search) {
-                          $q->where('name', 'like', "%{$search}%");
-                      });
-            })
-            ->paginate(10)
-            ->withQueryString(); // keeps the search term in pagination links
-
-        return view('jobs.index', compact('jobs', 'search'));
+        $jobs = Job::with('employer')->paginate(10);
+        return view('jobs.index', compact('jobs'));
     }
 
-    /**
-     * Show the form to create a new job.
-     */
+    // Show form to create a new job
     public function create()
     {
-        $job = new Job(); // empty job instance for the form
+        $job = new Job();
         return view('jobs.form', compact('job'));
     }
 
-    /**
-     * Store a new job in the database.
-     */
+    // Store new job in database
     public function store(Request $request)
     {
         $validated = $request->validate([
             'title' => ['required', 'min:3'],
-            'salary' => ['required', 'numeric'],
+            'salary' => ['required', 'numeric']
         ]);
 
         Job::create([
             'title' => $validated['title'],
             'salary' => $validated['salary'],
-            'employer_id' => 1, // hardcoded for now, replace with real employer as needed
+            'employer_id' => $request->user()->id ?? 1 // dynamically use logged-in user if applicable
         ]);
 
         return redirect()->route('jobs.index')->with('success', 'Job created successfully!');
     }
 
-    /**
-     * Display a single job's details.
-     */
+    // Show a single job
     public function show(Job $job)
     {
-        $job->load(['employer', 'tags']);
         return view('jobs.show', compact('job'));
     }
 
-    /**
-     * Show the form to edit an existing job.
-     */
+    // Show form to edit a job
     public function edit(Job $job)
     {
         return view('jobs.form', compact('job'));
     }
 
-    /**
-     * Update a job in the database.
-     */
+    // Update a job
     public function update(Request $request, Job $job)
     {
         $validated = $request->validate([
             'title' => ['required', 'min:3'],
-            'salary' => ['required', 'numeric'],
+            'salary' => ['required', 'numeric']
         ]);
 
-        $job->update($validated); // safe update
+        $job->update($validated);
 
         return redirect()->route('jobs.show', $job)->with('success', 'Job updated successfully!');
     }
 
-    /**
-     * Delete a job from the database.
-     */
+    // Delete a job
     public function destroy(Job $job)
     {
         $job->delete();
         return redirect()->route('jobs.index')->with('success', 'Job deleted successfully!');
     }
 
-    /**
-     * Attach random tags to a job (for testing purposes).
-     */
+    // Attach random tags to a job (for testing)
     public function attachTagsToJob($id = null)
     {
         $job = $id ? Job::find($id) : Job::first();
 
         if (!$job) {
-            return response("Job not found!", 404);
+            return response()->json(['message' => 'Job not found!'], 404);
         }
 
-        $tagIds = Tag::inRandomOrder()->take(2)->pluck('id');
+        $tagIds = Tag::inRandomOrder()->take(2)->pluck('id')->toArray();
         $job->tags()->sync($tagIds);
 
-        return response("Tags attached successfully to Job ID {$job->id}!", 200);
+        return response()->json([
+            'message' => "Tags attached successfully to Job ID {$job->id}!",
+            'tags' => $job->tags
+        ], 200);
     }
 }
