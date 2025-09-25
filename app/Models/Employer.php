@@ -9,7 +9,18 @@ class Employer extends Model
 {
     use HasFactory;
 
-    // One employer can have many jobs
+    /**
+     * The attributes that are mass assignable.
+     */
+    protected $fillable = [
+        'name',
+        'email',
+        'address',
+    ];
+
+    /**
+     * One employer can have many jobs.
+     */
     public function jobs()
     {
         return $this->hasMany(\App\Models\Job::class);

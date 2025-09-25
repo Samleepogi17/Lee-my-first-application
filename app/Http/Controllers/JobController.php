@@ -9,16 +9,22 @@ use App\Models\Tag;
 class JobController extends Controller
 {
     /**
-     * Display a list of all jobs with their employers and tags.
+     * Display a paginated list of all jobs with their employers and tags.
+     * Supports optional search by job title.
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Eager-load employer and tags relationships
-        $jobs = Job::with('employer', 'tags')->get();
+        $query = Job::with(['employer', 'tags']);
 
-        return view('jobs', [
-            'jobs' => $jobs
-        ]);
+        // Optional search filter
+        if ($request->has('search') && !empty($request->search)) {
+            $search = $request->search;
+            $query->where('title', 'like', "%{$search}%");
+        }
+
+        $jobs = $query->paginate(10)->withQueryString(); // keeps search query on pagination
+
+        return view('jobs.index', compact('jobs'));
     }
 
     /**
@@ -26,28 +32,27 @@ class JobController extends Controller
      */
     public function show($id)
     {
-        $job = Job::with('employer', 'tags')->findOrFail($id);
+        $job = Job::with(['employer', 'tags'])->findOrFail($id);
 
-        return view('job', [
-            'job' => $job
-        ]);
+        return view('jobs.show', compact('job'));
     }
 
     /**
-     * Attach tags to a job (example/test method).
+     * Attach random tags to a job (for testing purposes).
      */
-    public function attachTagsToJob($id = 1)
+    public function attachTagsToJob($id = null)
     {
-        $job = Job::find($id);
+        // Use given ID or first job
+        $job = $id ? Job::find($id) : Job::first();
 
         if (!$job) {
-            return "Job not found!";
+            return response("Job not found!", 404);
         }
 
-        // Example tag IDs to attach; replace with dynamic IDs if needed
-        $tagIds = [1, 2, 3];
+        // Attach 2 random tags dynamically
+        $tagIds = Tag::inRandomOrder()->take(2)->pluck('id');
         $job->tags()->sync($tagIds);
 
-        return "Tags attached successfully to Job ID {$id}!";
+        return response("Tags attached successfully to Job ID {$job->id}!", 200);
     }
 }

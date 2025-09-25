@@ -6,14 +6,13 @@ use App\Http\Controllers\JobController;
 // Home page
 Route::get('/', function () {
     return view('home');
-});
+})->name('home');
 
 // All jobs (listing page)
-Route::get('/jobs', [JobController::class, 'index']);
+Route::get('/jobs', [JobController::class, 'index'])->name('jobs.index');
 
 // Single job (detail page)
-Route::get('/jobs/{id}', [JobController::class, 'show']);
+Route::get('/jobs/{id}', [JobController::class, 'show'])->name('jobs.show');
 
 // Attach tags to a job (for testing)
-// Optional {id} parameter, defaults to 1 in controller
-Route::get('/attach-tags/{id?}', [JobController::class, 'attachTagsToJob']);
+Route::get('/attach-tags/{id?}', [JobController::class, 'attachTagsToJob'])->name('jobs.attach-tags');

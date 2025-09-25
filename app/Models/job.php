@@ -12,6 +12,11 @@ class Job extends Model
     // Use the job_listings table instead of default "jobs"
     protected $table = 'job_listings';
 
+    // Cast salary to float automatically
+    protected $casts = [
+        'salary' => 'float',
+    ];
+
     // Each job belongs to one employer
     public function employer()
     {
